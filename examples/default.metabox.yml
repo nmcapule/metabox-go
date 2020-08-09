@@ -1,0 +1,30 @@
+version: 0.1
+workspace:
+    root_path: ./
+    cache_path: ./cache
+    versions_path: ./versions.txt
+    hooks:
+        pre_backup:
+            - "date > /tmp/hello.txt"
+        post_restore:
+            - "echo /tmp/hello.txt"
+            - "echo ohmigash"
+    options:
+        compress: .tar.gz
+        hash: md5sum
+target:
+    driver: local
+    local:
+        prefix_path: /tmp
+        includes:
+            - "**/*"
+        excludes:
+            - ".gitignore"
+backup:
+    driver: s3
+    s3:
+        access_key_id: sample-access-key
+        secret_access_key: sample-secret-key
+        region: ap-southeast-1
+        bucket: my-bucket
+        prefix_path: archives

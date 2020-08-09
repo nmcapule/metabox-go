@@ -1,14 +1,13 @@
 version: 0.1
 workspace:
-    root_path: ./
+    root_path: /home/nmcapule/projects/metabox-go
     cache_path: ./cache
     versions_path: ./versions.txt
     hooks:
         pre_backup:
-            - "date > /tmp/hello.txt"
-        post_restore:
-            - "echo /tmp/hello.txt"
-            - "echo ohmigash"
+            - "echo start"
+        post_backup:
+            - "echo end"
     options:
         compress: .tar.gz
         hash: md5sum
@@ -19,7 +18,7 @@ target:
         includes:
             - "**/*"
         excludes:
-            - ".gitignore"
+            - ".git/"
 backup:
     driver: s3
     s3:

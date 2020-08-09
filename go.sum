@@ -1,3 +1,5 @@
+github.com/bmatcuk/doublestar/v2 v2.0.0 h1:G6Tb0DmBWsw7z6wYMzbPYcQh0iGqpOS+x/Snj6wXW8w=
+github.com/bmatcuk/doublestar/v2 v2.0.0/go.mod h1:QMmcs3H2AUQICWhfzLXz+IYln8lRQmTZRptLie8RgRw=
 github.com/go-yaml/yaml v2.1.0+incompatible h1:RYi2hDdss1u4YE7GwixGzWwVo47T8UQwnTLB6vQiq+o=
 github.com/go-yaml/yaml v2.1.0+incompatible/go.mod h1:w2MrLa16VYP0jy6N7M5kHaCkaLENm+P+Tv+MfurjSw0=
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=

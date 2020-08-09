@@ -2,10 +2,9 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 
-	"github.com/nmcapule/metabox-go/config"
+	"github.com/nmcapule/metabox-go/metabox"
 )
 
 func main() {
@@ -16,10 +15,12 @@ func main() {
 		log.Fatalln("Required argument <config-path> is empty!")
 	}
 
-	cfg, err := config.FromFile(cfgpath)
+	box, err := metabox.FromConfigFile(cfgpath)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	fmt.Printf("%+v", cfg)
+	if err := box.Start(); err != nil {
+		log.Fatalln(err)
+	}
 }

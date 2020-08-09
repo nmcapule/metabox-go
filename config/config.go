@@ -23,6 +23,12 @@ type WorkspaceConfig struct {
 	} `yaml:"options"`
 }
 
+type TargetDriver string
+
+const (
+	TargetDriverLocal = "local"
+)
+
 type TargetConfig struct {
 	Driver string `yaml:"driver"`
 	Local  struct {
@@ -31,6 +37,13 @@ type TargetConfig struct {
 		Excludes   []string `yaml:"excludes"`
 	} `yaml:"local"`
 }
+
+type BackupDriver string
+
+const (
+	BackupDriverS3    = "s3"
+	BackupDriverLocal = "local"
+)
 
 type BackupConfig struct {
 	Driver string `yaml:"driver"`
@@ -56,7 +69,7 @@ func FromFile(filename string) (*Config, error) {
 		return nil, err
 	}
 
-	// Expand environment variables. This is a hack.
+	// Expand environment variables in the file before parsing.
 	s := []byte(os.ExpandEnv(string(b)))
 
 	var cfg Config

@@ -17,10 +17,10 @@ func main() {
 
 	box, err := metabox.FromConfigFile(cfgpath)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln("Unexpected error:", err)
 	}
 
-	if err := box.Start(); err != nil {
-		log.Fatalln(err)
+	if err := box.StartBackup(); err != nil {
+		log.Fatalln("Unexpected error:", err)
 	}
 }

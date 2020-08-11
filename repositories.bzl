@@ -193,3 +193,9 @@ def go_repositories():
         sum = "h1:G6Tb0DmBWsw7z6wYMzbPYcQh0iGqpOS+x/Snj6wXW8w=",
         version = "v2.0.0",
     )
+    go_repository(
+        name = "com_github_jszwec_csvutil",
+        importpath = "github.com/jszwec/csvutil",
+        sum = "h1:ro7gZN8PRsyNUEX8qE/eYPE5/kffEXMs+4eRcOd1oUk=",
+        version = "v1.4.0",
+    )

@@ -14,9 +14,11 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"time"
 
 	"github.com/bmatcuk/doublestar/v2"
 	"github.com/nmcapule/metabox-go/config"
+	"github.com/nmcapule/metabox-go/tracker"
 )
 
 // Metabox implements a configurable backup / restore tool.
@@ -43,6 +45,11 @@ func FromConfigFile(filename string) (*Metabox, error) {
 
 // StartBackup executes the backup workflow of Metabox.
 func (m *Metabox) StartBackup() error {
+	// Make sure rootpath exists.
+	if err := ensurePathExists(m.config.Workspace.RootPath); err != nil {
+		return err
+	}
+
 	// 1. run pre-backup hook
 	if err := m.exec("pre-backup", m.config.Workspace.Hooks.PreBackup); err != nil {
 		return err
@@ -54,23 +61,44 @@ func (m *Metabox) StartBackup() error {
 		return err
 	}
 
-	hashsum, err := m.hash(filepaths)
+	b, err := m.hash(filepaths)
 	if err != nil {
 		return err
 	}
+	sum := fmt.Sprintf("%x", b)
 
-	if err := m.compress(filepaths, fmt.Sprintf("%x", hashsum)); err != nil {
+	if err := m.compress(filepaths, sum); err != nil {
 		return err
 	}
 
 	// 3. record to versioning file
-	// TODO(nmcapule): Implement me.
+	db, err := tracker.NewSimpleFileDB(m.derivedVersionsPath())
+	if err != nil {
+		return err
+	}
+	db.Put(sum, &tracker.Item{
+		ID:      sum,
+		Created: tracker.Time(time.Now()),
+		Author:  m.config.Workspace.UserIdentifier,
+		Tags:    m.config.Workspace.TagsGenerator,
+	})
+	if err := db.Flush(); err != nil {
+		return err
+	}
 
 	// 4. run post-backup hook
 	if err := m.exec("post-backup", m.config.Workspace.Hooks.PostBackup); err != nil {
 		return err
 	}
 	return nil
+}
+
+func (m *Metabox) derivedVersionsPath() string {
+	return filepath.Join(m.config.Workspace.RootPath, m.config.Workspace.VersionsPath)
+}
+
+func (m *Metabox) derivedCachePath() string {
+	return filepath.Join(m.config.Workspace.RootPath, m.config.Workspace.CachePath)
 }
 
 // exec executes a shell command.
@@ -83,14 +111,6 @@ func (m *Metabox) exec(step string, lines []string) error {
 		log.Printf("%s: %s", step, line)
 	}
 	return nil
-}
-
-func matches(root, matcher, path string) (bool, error) {
-	if matcher[len(matcher)-1] == '/' {
-		matcher += "**/*"
-	}
-	pattern := filepath.Join(root, matcher)
-	return doublestar.PathMatch(pattern, path)
 }
 
 func (m *Metabox) walk() ([]string, error) {
@@ -200,14 +220,10 @@ func (m *Metabox) compress(filepaths []string, name string) error {
 		return fmt.Errorf("retrieving absolute path: %v", err)
 	}
 
-	cachepath := filepath.Join(m.config.Workspace.RootPath, m.config.Workspace.CachePath)
-
 	// Make sure cachepath exists.
-	if _, err := os.Stat(cachepath); os.IsNotExist(err) {
-		err := os.Mkdir(cachepath, os.FileMode(0777))
-		if err != nil {
-			return fmt.Errorf("creating %s: %v", cachepath, err)
-		}
+	cachepath := m.derivedCachePath()
+	if err := ensurePathExists(cachepath); err != nil {
+		return err
 	}
 
 	// Create target output file.
@@ -263,4 +279,23 @@ func (m *Metabox) compress(filepaths []string, name string) error {
 	}
 
 	return nil
+}
+
+func matches(root, matcher, path string) (bool, error) {
+	if matcher[len(matcher)-1] == '/' {
+		matcher += "**/*"
+	}
+	pattern := filepath.Join(root, matcher)
+	return doublestar.PathMatch(pattern, path)
+}
+
+func ensurePathExists(path string) error {
+	_, err := os.Stat(path)
+	if os.IsNotExist(err) {
+		if err := os.Mkdir(path, os.FileMode(0777)); err != nil {
+			return fmt.Errorf("creating %s: %v", path, err)
+		}
+		return nil
+	}
+	return err
 }

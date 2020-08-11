@@ -7,6 +7,7 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//config:go_default_library",
+        "//tracker:go_default_library",
         "@com_github_bmatcuk_doublestar_v2//:go_default_library",
     ],
 )

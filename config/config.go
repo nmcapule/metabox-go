@@ -8,10 +8,12 @@ import (
 )
 
 type WorkspaceConfig struct {
-	RootPath     string `yaml:"root_path"`
-	CachePath    string `yaml:"cache_path"`
-	VersionsPath string `yaml:"versions_path"`
-	Hooks        struct {
+	RootPath       string   `yaml:"root_path"`
+	CachePath      string   `yaml:"cache_path"`
+	VersionsPath   string   `yaml:"versions_path"`
+	UserIdentifier string   `yaml:"user_identifier"`
+	TagsGenerator  []string `yaml:"tags_generator"`
+	Hooks          struct {
 		PreBackup   []string `yaml:"pre_backup"`
 		PostBackup  []string `yaml:"post_backup"`
 		PreRestore  []string `yaml:"pre_restore"`

@@ -1,6 +1,6 @@
 version: 0.1
 workspace:
-    root_path: /tmp
+    root_path: /home/nmcapule/projects/metabox-go/examples
     cache_path: ./cache
     versions_path: ./versions.txt
     hooks:
@@ -9,8 +9,12 @@ workspace:
         post_backup:
             - "echo end"
     options:
-        compress: .tar.gz
+        compress: tgz
         hash: md5
+    user_identifier: "${USER}"
+    tags_generator:
+        - "test:true"
+        - "author:${USER}"
 target:
     driver: local
     local:
@@ -22,6 +26,9 @@ target:
             - "dockerdata/"
             - "vendor/"
             - "**/*.exe"
+            - "**/*.tar.gz"
+            - "**/cache/"
+            - "**/versions.txt"
 backup:
     driver: s3
     s3:

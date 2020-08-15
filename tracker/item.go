@@ -22,6 +22,11 @@ func (t Tags) Has(tag string) bool {
 }
 
 func (t Tags) MarshalCSV() ([]byte, error) {
+	// Workaround serialization if no tags are available.
+	if len(t) == 0 {
+		t = append(t, "-")
+	}
+
 	var buf bytes.Buffer
 
 	w := csv.NewWriter(&buf)

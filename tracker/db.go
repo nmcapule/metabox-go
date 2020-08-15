@@ -12,6 +12,7 @@ type Predicate func(*Item) bool
 
 // List of prebuilt predicates.
 var (
+	PredicateAll = func(item *Item) bool { return true }
 	PredicateTag = func(tag string) Predicate {
 		return func(item *Item) bool { return item.Tags.Has(tag) }
 	}

@@ -62,6 +62,11 @@ func (db *SimpleFileDB) Get(key string) (*Item, error) {
 }
 
 func (db *SimpleFileDB) Query(predicates ...Predicate) ([]*Item, error) {
+	// If predicates is empty, select all items.
+	if len(predicates) == 0 {
+		predicates = append(predicates, PredicateAll)
+	}
+
 	var items []*Item
 	for _, item := range db.table {
 		// Pass all predicates or else be excluded from the result.

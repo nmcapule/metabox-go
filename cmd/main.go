@@ -58,10 +58,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Reading config from %q: %v", *flagConfigPath, err)
 	}
-	if *flagUseTag != "" {
-		cfg.Workspace.TagsGenerator = append(cfg.Workspace.TagsGenerator, *flagUseTag)
-	}
-
 	box, err := metabox.New(cfg)
 	if err != nil {
 		log.Fatalln("Create metabox:", err)
@@ -69,11 +65,18 @@ func main() {
 
 	switch cmd {
 	case "backup":
+		if *flagUseTag != "" {
+			cfg.Workspace.TagsGenerator = append(cfg.Workspace.TagsGenerator, *flagUseTag)
+		}
 		if err := backup(box); err != nil {
 			log.Fatalln("Metabox backup:", err)
 		}
 	case "restore":
-		if err := restore(box, *flagUseTag); err != nil {
+		var filter []string
+		if *flagUseTag != "" {
+			filter = append(filter, *flagUseTag)
+		}
+		if err := restore(box, filter...); err != nil {
 			log.Fatalln("Metabox restore:", err)
 		}
 	default:

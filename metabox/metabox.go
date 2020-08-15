@@ -128,7 +128,7 @@ func (m *Metabox) derivedCachePath() string {
 }
 
 func (m *Metabox) derivedTargetPath() string {
-	return filepath.Join(m.Config.Workspace.RootPath, m.Config.Target.Local.PrefixPath)
+	return filepath.Join(m.Config.Workspace.RootPath, m.Config.Target.PrefixPath)
 }
 
 // exec executes a shell command.
@@ -162,9 +162,9 @@ func (m *Metabox) walk() ([]string, error) {
 		}
 
 		// If includes is specified, filter out non-matching paths.
-		if len(m.Config.Target.Local.Includes) > 0 {
+		if len(m.Config.Target.Includes) > 0 {
 			var include bool
-			for _, matcher := range m.Config.Target.Local.Includes {
+			for _, matcher := range m.Config.Target.Includes {
 				if ok, err := matches(target, matcher, path); ok {
 					include = true
 					break
@@ -179,8 +179,8 @@ func (m *Metabox) walk() ([]string, error) {
 		}
 
 		// If excludes is specified, filter out matching paths.
-		if len(m.Config.Target.Local.Excludes) > 0 {
-			for _, matcher := range m.Config.Target.Local.Excludes {
+		if len(m.Config.Target.Excludes) > 0 {
+			for _, matcher := range m.Config.Target.Excludes {
 				ok, err := matches(target, matcher, path)
 				if err != nil || ok {
 					return err

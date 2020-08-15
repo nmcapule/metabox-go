@@ -12,7 +12,7 @@ import (
 )
 
 func (m *Metabox) hash(filepaths []string) ([]byte, error) {
-	target, err := filepath.Abs(m.Config.Target.Local.PrefixPath)
+	target, err := filepath.Abs(m.Config.Target.PrefixPath)
 	if err != nil {
 		return nil, fmt.Errorf("retrieving absolute path: %v", err)
 	}

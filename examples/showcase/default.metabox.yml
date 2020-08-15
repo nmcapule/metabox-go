@@ -15,14 +15,12 @@ workspace:
         - "test:true"
         - "author:${USER}"
 target:
-    driver: local
-    local:
-        prefix_path: ./target
-        includes:
-            - "**/*"
-        excludes:
-            - ".git/"
-            - "**/*.exe"
+    prefix_path: ./target
+    includes:
+        - "**/*"
+    excludes:
+        - ".git/"
+        - "**/*.exe"
 backup:
     driver: s3
     s3:

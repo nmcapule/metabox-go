@@ -35,12 +35,9 @@ const (
 )
 
 type TargetConfig struct {
-	Driver string `yaml:"driver"`
-	Local  struct {
-		PrefixPath string   `yaml:"prefix_path"`
-		Includes   []string `yaml:"includes"`
-		Excludes   []string `yaml:"excludes"`
-	} `yaml:"local"`
+	PrefixPath string   `yaml:"prefix_path"`
+	Includes   []string `yaml:"includes"`
+	Excludes   []string `yaml:"excludes"`
 }
 
 type BackupDriver string

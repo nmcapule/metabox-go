@@ -1,0 +1,8 @@
+version: 0.1
+target:
+    prefix_path: ../../
+    includes:
+        - "**/*"
+    excludes:
+        - ".git/"
+        - "examples/"

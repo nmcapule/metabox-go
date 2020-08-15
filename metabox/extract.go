@@ -10,7 +10,7 @@ import (
 )
 
 func (m *Metabox) extract(name string) error {
-	target, err := filepath.Abs(m.Config.Target.Local.PrefixPath)
+	target, err := filepath.Abs(m.derivedTargetPath())
 	if err != nil {
 		return fmt.Errorf("retrieving absolute path: %v", err)
 	}

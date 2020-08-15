@@ -80,7 +80,7 @@ func (db *SimpleFileDB) QueryLatest(predicate Predicate) (*Item, error) {
 	}
 
 	sort.Slice(items, func(a, b int) bool {
-		return time.Time(items[a].Created).Unix() < time.Time(items[b].Created).Unix()
+		return time.Time(items[a].Created).Unix() > time.Time(items[b].Created).Unix()
 	})
 
 	return items[0], nil

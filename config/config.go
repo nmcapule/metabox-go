@@ -13,8 +13,8 @@ import (
 type WorkspaceConfig struct {
 	RootPath       string   `yaml:"root_path"`
 	CachePath      string   `yaml:"cache_path" default:"./cache"`
-	VersionsPath   string   `yaml:"versions_path" default:"./versions.txt"`
-	UserIdentifier string   `yaml:"user_identifier"`
+	VersionsPath   string   `yaml:"versions_path" default:"./backups.txt"`
+	UserIdentifier string   `yaml:"user_identifier" default:"anonymous"`
 	TagsGenerator  []string `yaml:"tags_generator"`
 	Hooks          struct {
 		PreBackup   []string `yaml:"pre_backup"`
@@ -23,8 +23,8 @@ type WorkspaceConfig struct {
 		PostRestore []string `yaml:"post_restore"`
 	} `yaml:"hooks"`
 	Options struct {
-		Compress string `yaml:"compress"`
-		Hash     string `yaml:"hash"`
+		Compress string `yaml:"compress" default:"tgz"`
+		Hash     string `yaml:"hash" default:"md5"`
 	} `yaml:"options"`
 }
 
@@ -74,7 +74,7 @@ func FromFile(filename string) (*Config, error) {
 		return nil, err
 	}
 
-	// Expand environment variables in the file before parsing.
+	// Naively expand environment variables in the file before parsing.
 	s := []byte(os.ExpandEnv(string(b)))
 
 	var cfg Config

@@ -1,0 +1,13 @@
+version: 0.1
+workspace:
+    tags_generator:
+        - "ouroboros"
+target:
+    driver: local
+    local:
+        prefix_path: ../
+        includes:
+            - "**/*"
+        excludes:
+            - ".git/"
+            - "examples/"

@@ -17,7 +17,7 @@ workspace:
 target:
     driver: local
     local:
-        prefix_path: /home/nmcapule/projects/metabox-go/examples/target
+        prefix_path: ./target
         includes:
             - "**/*"
         excludes:

@@ -11,7 +11,7 @@ import (
 )
 
 func (m *Metabox) compress(filepaths []string, name string) error {
-	target, err := filepath.Abs(m.Config.Target.Local.PrefixPath)
+	target, err := filepath.Abs(m.derivedTargetPath())
 	if err != nil {
 		return fmt.Errorf("retrieving absolute path: %v", err)
 	}

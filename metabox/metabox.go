@@ -127,6 +127,10 @@ func (m *Metabox) derivedCachePath() string {
 	return filepath.Join(m.Config.Workspace.RootPath, m.Config.Workspace.CachePath)
 }
 
+func (m *Metabox) derivedTargetPath() string {
+	return filepath.Join(m.Config.Workspace.RootPath, m.Config.Target.Local.PrefixPath)
+}
+
 // exec executes a shell command.
 func (m *Metabox) exec(step string, lines []string) error {
 	for _, line := range lines {
@@ -140,7 +144,7 @@ func (m *Metabox) exec(step string, lines []string) error {
 }
 
 func (m *Metabox) walk() ([]string, error) {
-	target, err := filepath.Abs(m.Config.Target.Local.PrefixPath)
+	target, err := filepath.Abs(m.derivedTargetPath())
 	if err != nil {
 		return nil, fmt.Errorf("retrieving absolute path: %v", err)
 	}

@@ -7,11 +7,12 @@ import (
 	"time"
 )
 
+// Predicate is a condition / matcher function for a tracker item.
 type Predicate func(*Item) bool
 
+// List of prebuilt predicates.
 var (
-	PredicateAll Predicate = func(item *Item) bool { return true }
-	PredicateTag           = func(tag string) Predicate {
+	PredicateTag = func(tag string) Predicate {
 		return func(item *Item) bool { return item.Tags.Has(tag) }
 	}
 )
@@ -59,18 +60,26 @@ func (db *SimpleFileDB) Get(key string) (*Item, error) {
 	return item, nil
 }
 
-func (db *SimpleFileDB) Query(predicate Predicate) ([]*Item, error) {
+func (db *SimpleFileDB) Query(predicates ...Predicate) ([]*Item, error) {
 	var items []*Item
 	for _, item := range db.table {
-		if predicate(item) {
+		// Pass all predicates or else be excluded from the result.
+		var exclude bool
+		for _, p := range predicates {
+			if !p(item) {
+				exclude = true
+				break
+			}
+		}
+		if !exclude {
 			items = append(items, item)
 		}
 	}
 	return items, nil
 }
 
-func (db *SimpleFileDB) QueryLatest(predicate Predicate) (*Item, error) {
-	items, err := db.Query(predicate)
+func (db *SimpleFileDB) QueryLatest(predicates ...Predicate) (*Item, error) {
+	items, err := db.Query(predicates...)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +96,7 @@ func (db *SimpleFileDB) QueryLatest(predicate Predicate) (*Item, error) {
 }
 
 func (db *SimpleFileDB) Flush() error {
-	items, err := db.Query(PredicateAll)
+	items, err := db.Query()
 	if err != nil {
 		return err
 	}

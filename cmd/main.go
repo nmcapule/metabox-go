@@ -32,15 +32,15 @@ func backup(box *metabox.Metabox) error {
 	return nil
 }
 
-func restore(box *metabox.Metabox, tag string) error {
-	cond := tracker.PredicateAll
-	if tag != "" {
-		cond = tracker.PredicateTag(tag)
+func restore(box *metabox.Metabox, tags ...string) error {
+	var matchers []tracker.Predicate
+	for _, tag := range tags {
+		matchers = append(matchers, tracker.PredicateTag(tag))
 	}
 
-	item, err := box.DB.QueryLatest(cond)
+	item, err := box.DB.QueryLatest(matchers...)
 	if err != nil {
-		return fmt.Errorf("retrieving item tagged %q: %v", tag, err)
+		return fmt.Errorf("retrieving item tagged %+v: %v", tags, err)
 	}
 
 	return box.StartRestore(item)

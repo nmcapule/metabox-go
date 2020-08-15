@@ -2,12 +2,19 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 go_library(
     name = "go_default_library",
-    srcs = ["metabox.go"],
+    srcs = [
+        "compress.go",
+        "errors.go",
+        "extract.go",
+        "hash.go",
+        "metabox.go",
+        "utils.go",
+    ],
     importpath = "github.com/nmcapule/metabox-go/metabox",
     visibility = ["//visibility:public"],
     deps = [
         "//config:go_default_library",
         "//tracker:go_default_library",
-        "@com_github_bmatcuk_doublestar_v2//:go_default_library",
+        "@com_github_bmatcuk_doublestar//:go_default_library",
     ],
 )

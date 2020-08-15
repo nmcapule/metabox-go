@@ -1,6 +1,5 @@
 version: 0.1
 workspace:
-    root_path: /home/nmcapule/projects/metabox-go/examples
     cache_path: ./cache
     versions_path: ./versions.txt
     hooks:
@@ -18,17 +17,12 @@ workspace:
 target:
     driver: local
     local:
-        prefix_path: /home/nmcapule/projects/metabox-go
+        prefix_path: /home/nmcapule/projects/metabox-go/examples/target
         includes:
             - "**/*"
         excludes:
             - ".git/"
-            - "dockerdata/"
-            - "vendor/"
             - "**/*.exe"
-            - "**/*.tar.gz"
-            - "**/cache/"
-            - "**/versions.txt"
 backup:
     driver: s3
     s3:

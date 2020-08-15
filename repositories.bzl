@@ -199,3 +199,15 @@ def go_repositories():
         sum = "h1:ro7gZN8PRsyNUEX8qE/eYPE5/kffEXMs+4eRcOd1oUk=",
         version = "v1.4.0",
     )
+    go_repository(
+        name = "com_github_bmatcuk_doublestar",
+        importpath = "github.com/bmatcuk/doublestar",
+        sum = "h1:rT8rxDPsavp9G+4ZULzqhhUSaI/OPsTZNG88Z3i0xvY=",
+        version = "v1.3.1",
+    )
+    go_repository(
+        name = "com_github_creasty_defaults",
+        importpath = "github.com/creasty/defaults",
+        sum = "h1:DW6NAGGaKuNSKkntc8BCBrR2KOUAcXVnfcwu/LmJhaQ=",
+        version = "v1.5.0",
+    )

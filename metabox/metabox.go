@@ -1,37 +1,36 @@
 package metabox
 
 import (
-	"archive/tar"
-	"bufio"
-	"compress/gzip"
-	"crypto/md5"
-	"crypto/sha256"
 	"fmt"
-	"hash"
-	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"time"
 
-	"github.com/bmatcuk/doublestar/v2"
 	"github.com/nmcapule/metabox-go/config"
 	"github.com/nmcapule/metabox-go/tracker"
 )
 
 // Metabox implements a configurable backup / restore tool.
 type Metabox struct {
-	config config.Config
+	Config *config.Config
+	DB     *tracker.SimpleFileDB
 	logger log.Logger
 }
 
 // New creates a new Metabox instance.
-func New(cfg config.Config) (*Metabox, error) {
-	return &Metabox{
-		config: cfg,
-	}, nil
+func New(cfg *config.Config) (*Metabox, error) {
+	box := &Metabox{Config: cfg}
+
+	db, err := tracker.NewSimpleFileDB(box.derivedVersionsPath())
+	if err != nil {
+		return nil, err
+	}
+
+	box.DB = db
+
+	return box, nil
 }
 
 // FromConfigFile creates a new Metabox instance from a config file path.
@@ -40,65 +39,92 @@ func FromConfigFile(filename string) (*Metabox, error) {
 	if err != nil {
 		return nil, err
 	}
-	return New(*cfg)
+	return New(cfg)
 }
 
 // StartBackup executes the backup workflow of Metabox.
-func (m *Metabox) StartBackup() error {
+func (m *Metabox) StartBackup() (*tracker.Item, error) {
 	// Make sure rootpath exists.
-	if err := ensurePathExists(m.config.Workspace.RootPath); err != nil {
-		return err
+	if err := ensurePathExists(m.Config.Workspace.RootPath); err != nil {
+		return nil, err
 	}
 
 	// 1. run pre-backup hook
-	if err := m.exec("pre-backup", m.config.Workspace.Hooks.PreBackup); err != nil {
-		return err
+	if err := m.exec("pre-backup", m.Config.Workspace.Hooks.PreBackup); err != nil {
+		return nil, err
 	}
 
 	// 2. walk through included files and hash and targz.
 	filepaths, err := m.walk()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	b, err := m.hash(filepaths)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	sum := fmt.Sprintf("%x", b)
 
+	// interim. check if already exists in versioning before compress and upload.
+	// TODO(nmcapule): Implement me.
+
 	if err := m.compress(filepaths, sum); err != nil {
-		return err
+		return nil, err
 	}
 
-	// 3. record to versioning file
-	db, err := tracker.NewSimpleFileDB(m.derivedVersionsPath())
-	if err != nil {
-		return err
-	}
-	db.Put(sum, &tracker.Item{
+	// 3. upload to backups
+	// TODO(nmcapule): Implement me.
+
+	// 4. record to versioning file
+	item := &tracker.Item{
 		ID:      sum,
 		Created: tracker.Time(time.Now()),
-		Author:  m.config.Workspace.UserIdentifier,
-		Tags:    m.config.Workspace.TagsGenerator,
-	})
-	if err := db.Flush(); err != nil {
+		Author:  m.Config.Workspace.UserIdentifier,
+		Tags:    m.Config.Workspace.TagsGenerator,
+	}
+
+	m.DB.Put(sum, item)
+	if err := m.DB.Flush(); err != nil {
+		return nil, err
+	}
+
+	// 5. run post-backup hook
+	if err := m.exec("post-backup", m.Config.Workspace.Hooks.PostBackup); err != nil {
+		return nil, err
+	}
+
+	return item, nil
+}
+
+func (m *Metabox) StartRestore(item *tracker.Item) error {
+	// 1. run pre-restore hook
+	if err := m.exec("pre-restore", m.Config.Workspace.Hooks.PreRestore); err != nil {
 		return err
 	}
 
-	// 4. run post-backup hook
-	if err := m.exec("post-backup", m.config.Workspace.Hooks.PostBackup); err != nil {
+	// 2. download from backups if does not exist in cache
+	// TODO(nmcapule): Implement me.
+
+	// 3. extract and copy to target path
+	if err := m.extract(item.ID); err != nil {
 		return err
 	}
+
+	// 4. run post-restore hook
+	if err := m.exec("post-restore", m.Config.Workspace.Hooks.PostRestore); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func (m *Metabox) derivedVersionsPath() string {
-	return filepath.Join(m.config.Workspace.RootPath, m.config.Workspace.VersionsPath)
+	return filepath.Join(m.Config.Workspace.RootPath, m.Config.Workspace.VersionsPath)
 }
 
 func (m *Metabox) derivedCachePath() string {
-	return filepath.Join(m.config.Workspace.RootPath, m.config.Workspace.CachePath)
+	return filepath.Join(m.Config.Workspace.RootPath, m.Config.Workspace.CachePath)
 }
 
 // exec executes a shell command.
@@ -114,7 +140,7 @@ func (m *Metabox) exec(step string, lines []string) error {
 }
 
 func (m *Metabox) walk() ([]string, error) {
-	target, err := filepath.Abs(m.config.Target.Local.PrefixPath)
+	target, err := filepath.Abs(m.Config.Target.Local.PrefixPath)
 	if err != nil {
 		return nil, fmt.Errorf("retrieving absolute path: %v", err)
 	}
@@ -132,9 +158,9 @@ func (m *Metabox) walk() ([]string, error) {
 		}
 
 		// If includes is specified, filter out non-matching paths.
-		if len(m.config.Target.Local.Includes) > 0 {
+		if len(m.Config.Target.Local.Includes) > 0 {
 			var include bool
-			for _, matcher := range m.config.Target.Local.Includes {
+			for _, matcher := range m.Config.Target.Local.Includes {
 				if ok, err := matches(target, matcher, path); ok {
 					include = true
 					break
@@ -149,8 +175,8 @@ func (m *Metabox) walk() ([]string, error) {
 		}
 
 		// If excludes is specified, filter out matching paths.
-		if len(m.config.Target.Local.Excludes) > 0 {
-			for _, matcher := range m.config.Target.Local.Excludes {
+		if len(m.Config.Target.Local.Excludes) > 0 {
+			for _, matcher := range m.Config.Target.Local.Excludes {
 				ok, err := matches(target, matcher, path)
 				if err != nil || ok {
 					return err
@@ -169,133 +195,4 @@ func (m *Metabox) walk() ([]string, error) {
 	}
 
 	return filepaths, nil
-}
-
-func (m *Metabox) hash(filepaths []string) ([]byte, error) {
-	target, err := filepath.Abs(m.config.Target.Local.PrefixPath)
-	if err != nil {
-		return nil, fmt.Errorf("retrieving absolute path: %v", err)
-	}
-
-	// Declare our hasher accumulator.
-	var hasher hash.Hash
-	switch m.config.Workspace.Options.Hash {
-	case "md5":
-		hasher = md5.New()
-	case "sha256":
-		fallthrough
-	default:
-		hasher = sha256.New()
-	}
-
-	// Do the hash for each file.
-	for _, path := range filepaths {
-		// Declare relative file path.
-		rel, err := filepath.Rel(target, path)
-		if err != nil {
-			return nil, fmt.Errorf("relpath of %s: %v", path, err)
-		}
-
-		f, err := os.Open(path)
-		if err != nil {
-			return nil, fmt.Errorf("opening %s: %v", rel, err)
-		}
-
-		// Add relative file path to hash accumulator.
-		if _, err := hasher.Write([]byte(rel)); err != nil {
-			return nil, fmt.Errorf("hashing %s: %v", rel, err)
-		}
-		// Add file contents to hash accumulator.
-		if _, err := io.Copy(hasher, bufio.NewReader(f)); err != nil {
-			return nil, fmt.Errorf("hashing %s: %v", rel, err)
-		}
-	}
-
-	return hasher.Sum(nil), nil
-}
-
-func (m *Metabox) compress(filepaths []string, name string) error {
-	target, err := filepath.Abs(m.config.Target.Local.PrefixPath)
-	if err != nil {
-		return fmt.Errorf("retrieving absolute path: %v", err)
-	}
-
-	// Make sure cachepath exists.
-	cachepath := m.derivedCachePath()
-	if err := ensurePathExists(cachepath); err != nil {
-		return err
-	}
-
-	// Create target output file.
-	outpath := filepath.FromSlash(fmt.Sprintf("%s/%s.tar.gz", cachepath, name))
-	file, err := os.OpenFile(outpath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
-	if err != nil {
-		return fmt.Errorf("creating tmp file: %v", err)
-	}
-	defer file.Close()
-
-	// Declare our gzip and tar writer.
-	gzw, err := gzip.NewWriterLevel(file, gzip.BestCompression)
-	if err != nil {
-		return fmt.Errorf("creating gzip writer: %v", err)
-	}
-	defer gzw.Close()
-
-	tw := tar.NewWriter(gzw)
-	defer tw.Close()
-
-	// Compress each file!
-	for _, path := range filepaths {
-		body, err := ioutil.ReadFile(path)
-		if err != nil {
-			return fmt.Errorf("reading %s: %v", path, err)
-		}
-
-		// Early exit on nil body.
-		if body == nil {
-			continue
-		}
-
-		// Declare relative file path.
-		rel, err := filepath.Rel(target, path)
-		if err != nil {
-			return fmt.Errorf("relpath of %s: %v", path, err)
-		}
-
-		log.Printf("compress %s", rel)
-
-		// Do the write to tar.gz!
-		hdr := &tar.Header{
-			Name: rel,
-			Mode: int64(0644),
-			Size: int64(len(body)),
-		}
-		if err := tw.WriteHeader(hdr); err != nil {
-			return fmt.Errorf("writing headers: %v", err)
-		}
-		if _, err := tw.Write(body); err != nil {
-			return fmt.Errorf("writing body: %v", err)
-		}
-	}
-
-	return nil
-}
-
-func matches(root, matcher, path string) (bool, error) {
-	if matcher[len(matcher)-1] == '/' {
-		matcher += "**/*"
-	}
-	pattern := filepath.Join(root, matcher)
-	return doublestar.PathMatch(pattern, path)
-}
-
-func ensurePathExists(path string) error {
-	_, err := os.Stat(path)
-	if os.IsNotExist(err) {
-		if err := os.Mkdir(path, os.FileMode(0777)); err != nil {
-			return fmt.Errorf("creating %s: %v", path, err)
-		}
-		return nil
-	}
-	return err
 }

@@ -12,6 +12,15 @@ import (
 // Tags is a []string wrapper with custom csv encode/decode.
 type Tags []string
 
+func (t Tags) Has(tag string) bool {
+	for _, s := range t {
+		if tag == s {
+			return true
+		}
+	}
+	return false
+}
+
 func (t Tags) MarshalCSV() ([]byte, error) {
 	var buf bytes.Buffer
 

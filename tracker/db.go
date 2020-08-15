@@ -1,20 +1,24 @@
 package tracker
 
 import (
+	"errors"
 	"fmt"
+	"sort"
+	"time"
 )
 
 type Predicate func(*Item) bool
 
 var (
 	PredicateAll Predicate = func(item *Item) bool { return true }
+	PredicateTag           = func(tag string) Predicate {
+		return func(item *Item) bool { return item.Tags.Has(tag) }
+	}
 )
 
-type DB interface {
-	Put(key string, item *Item) error
-	Get(key string) (*Item, error)
-	Query(predicate Predicate) ([]*Item, error)
-}
+var (
+	errEmptyResult = errors.New("no results found")
+)
 
 type SimpleFileDB struct {
 	path  string
@@ -63,6 +67,23 @@ func (db *SimpleFileDB) Query(predicate Predicate) ([]*Item, error) {
 		}
 	}
 	return items, nil
+}
+
+func (db *SimpleFileDB) QueryLatest(predicate Predicate) (*Item, error) {
+	items, err := db.Query(predicate)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(items) == 0 {
+		return nil, errEmptyResult
+	}
+
+	sort.Slice(items, func(a, b int) bool {
+		return time.Time(items[a].Created).Unix() < time.Time(items[b].Created).Unix()
+	})
+
+	return items[0], nil
 }
 
 func (db *SimpleFileDB) Flush() error {

@@ -5,7 +5,11 @@ go_library(
     srcs = ["main.go"],
     importpath = "github.com/nmcapule/metabox-go/cmd",
     visibility = ["//visibility:private"],
-    deps = ["//metabox:go_default_library"],
+    deps = [
+        "//config:go_default_library",
+        "//metabox:go_default_library",
+        "//tracker:go_default_library",
+    ],
 )
 
 go_binary(

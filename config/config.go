@@ -1,16 +1,19 @@
 package config
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 
+	"github.com/creasty/defaults"
 	"github.com/go-yaml/yaml"
 )
 
 type WorkspaceConfig struct {
 	RootPath       string   `yaml:"root_path"`
-	CachePath      string   `yaml:"cache_path"`
-	VersionsPath   string   `yaml:"versions_path"`
+	CachePath      string   `yaml:"cache_path" default:"./cache"`
+	VersionsPath   string   `yaml:"versions_path" default:"./versions.txt"`
 	UserIdentifier string   `yaml:"user_identifier"`
 	TagsGenerator  []string `yaml:"tags_generator"`
 	Hooks          struct {
@@ -76,5 +79,19 @@ func FromFile(filename string) (*Config, error) {
 
 	var cfg Config
 	err = yaml.Unmarshal(s, &cfg)
+
+	if err := defaults.Set(&cfg); err != nil {
+		return nil, fmt.Errorf("set defaults: %v", err)
+	}
+
+	// Use config file path as rootpath if empty.
+	if cfg.Workspace.RootPath == "" {
+		path, err := filepath.Abs(filename)
+		if err != nil {
+			return nil, fmt.Errorf("abs of %q: %v", filename, err)
+		}
+		cfg.Workspace.RootPath = filepath.Dir(path)
+	}
+
 	return &cfg, err
 }

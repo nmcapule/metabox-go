@@ -48,14 +48,29 @@ const (
 )
 
 type BackupConfig struct {
-	Driver string `yaml:"driver"`
-	S3     struct {
-		PrefixPath      string `yaml:"prefix_path"`
-		AccessKeyID     string `yaml:"access_key_id"`
-		SecretAccessKey string `yaml:"secret_access_key"`
-		Region          string `yaml:"region"`
-		Bucket          string `yaml:"bucket"`
-	} `yaml:"s3"`
+	Driver string              `yaml:"driver"`
+	S3     S3StorageConfig     `yaml:"s3"`
+	Local  LocalStorageConfig  `yaml:"local"`
+	Remote RemoteStorageConfig `yaml:"remote"`
+}
+
+type LocalStorageConfig struct {
+	Path string `yaml:"path"`
+}
+
+type RemoteStorageConfig struct {
+	Path            string `yaml:"path"`
+	Host            string `yaml:"host"`
+	User            string `yaml:"user"`
+	CredentialsPath string `yaml:"ssh_credential_file"`
+}
+
+type S3StorageConfig struct {
+	PrefixPath      string `yaml:"prefix_path"`
+	AccessKeyID     string `yaml:"access_key_id"`
+	SecretAccessKey string `yaml:"secret_access_key"`
+	Region          string `yaml:"region"`
+	Bucket          string `yaml:"bucket"`
 }
 
 type Config struct {

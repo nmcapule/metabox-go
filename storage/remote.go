@@ -14,14 +14,14 @@ func NewRemote(config *config.RemoteStorageConfig) (*Remote, error) {
 	return nil, errUnimplemented
 }
 
-func (s *Remote) Exists(name string) (bool, error) {
+func (s *Remote) Exists(key string) (bool, error) {
 	return false, errUnimplemented
 }
 
-func (s *Remote) Upload(name string, source io.Reader) error {
+func (s *Remote) Upload(key string, source io.Reader) error {
 	return errUnimplemented
 }
 
-func (s *Remote) Download(name string, destination io.Writer) error {
+func (s *Remote) Download(key string, destination io.Writer) error {
 	return errUnimplemented
 }

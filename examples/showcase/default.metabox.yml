@@ -21,11 +21,7 @@ target:
     excludes:
         - ".git/"
         - "**/*.exe"
-backup:
-    driver: s3
-    s3:
-        access_key_id: sample-access-key
-        secret_access_key: sample-secret-key
-        region: ap-southeast-1
-        bucket: my-bucket
-        prefix_path: archives
+backups:
+    - driver: local
+      local:
+          path: /tmp

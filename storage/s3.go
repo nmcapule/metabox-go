@@ -14,14 +14,14 @@ func NewS3(config *config.S3StorageConfig) (*S3, error) {
 	return nil, errUnimplemented
 }
 
-func (s *S3) Exists(name string) (bool, error) {
+func (s *S3) Exists(key string) (bool, error) {
 	return false, errUnimplemented
 }
 
-func (s *S3) Upload(name string, source io.Reader) error {
+func (s *S3) Upload(key string, source io.Reader) error {
 	return errUnimplemented
 }
 
-func (s *S3) Download(name string, destination io.Writer) error {
+func (s *S3) Download(key string, destination io.Writer) error {
 	return errUnimplemented
 }

@@ -23,7 +23,7 @@ func (m *Metabox) compress(filepaths []string, name string) error {
 	}
 
 	// Create target output file.
-	outpath := filepath.FromSlash(fmt.Sprintf("%s/%s.tar.gz", cachepath, name))
+	outpath := filepath.FromSlash(filepath.Join(cachepath, m.compressedFilename(name)))
 	file, err := os.OpenFile(outpath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		return fmt.Errorf("creating tmp file: %v", err)

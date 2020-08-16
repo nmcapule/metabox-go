@@ -77,7 +77,7 @@ type Config struct {
 	Version   string          `yaml:"version"`
 	Workspace WorkspaceConfig `yaml:"workspace"`
 	Target    TargetConfig    `yaml:"target"`
-	Backup    BackupConfig    `yaml:"backup"`
+	Backups   []BackupConfig  `yaml:"backups"`
 }
 
 func FromFile(filename string) (*Config, error) {

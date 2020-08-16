@@ -3,6 +3,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 go_library(
     name = "go_default_library",
     srcs = [
+        "backups.go",
         "compress.go",
         "errors.go",
         "extract.go",
@@ -14,6 +15,7 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//config:go_default_library",
+        "//storage:go_default_library",
         "//tracker:go_default_library",
         "@com_github_bmatcuk_doublestar//:go_default_library",
     ],

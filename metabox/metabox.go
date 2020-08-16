@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/nmcapule/metabox-go/config"
+	"github.com/nmcapule/metabox-go/storage"
 	"github.com/nmcapule/metabox-go/tracker"
 )
 
@@ -16,6 +17,7 @@ import (
 type Metabox struct {
 	Config *config.Config
 	DB     *tracker.SimpleFileDB
+	Stores []storage.Storage
 	logger log.Logger
 }
 
@@ -23,12 +25,34 @@ type Metabox struct {
 func New(cfg *config.Config) (*Metabox, error) {
 	box := &Metabox{Config: cfg}
 
+	// Instantiate tracker db.
 	db, err := tracker.NewSimpleFileDB(box.derivedVersionsPath())
 	if err != nil {
 		return nil, err
 	}
-
 	box.DB = db
+
+	// Instantiate storages.
+	var stores []storage.Storage
+	for i := range cfg.Backups {
+		var store storage.Storage
+		var err error
+		switch cfg.Backups[i].Driver {
+		case storage.LocalDriver:
+			store, err = storage.NewLocal(&cfg.Backups[i].Local)
+		case storage.RemoteDriver:
+			store, err = storage.NewRemote(&cfg.Backups[i].Remote)
+		case storage.S3Driver:
+			store, err = storage.NewS3(&cfg.Backups[i].S3)
+		default:
+			return nil, fmt.Errorf("unknown storage driver: %q", cfg.Backups[i].Driver)
+		}
+		if err != nil {
+			return nil, err
+		}
+		stores = append(stores, store)
+	}
+	box.Stores = stores
 
 	return box, nil
 }
@@ -44,8 +68,8 @@ func FromConfigFile(filename string) (*Metabox, error) {
 
 // StartBackup executes the backup workflow of Metabox.
 func (m *Metabox) StartBackup() (*tracker.Item, error) {
-	// Make sure rootpath exists.
-	if err := ensurePathExists(m.Config.Workspace.RootPath); err != nil {
+	// Make sure cachepath exists.
+	if err := ensurePathExists(m.derivedCachePath()); err != nil {
 		return nil, err
 	}
 
@@ -67,26 +91,33 @@ func (m *Metabox) StartBackup() (*tracker.Item, error) {
 	sum := fmt.Sprintf("%x", b)
 
 	// interim. check if already exists in versioning before compress and upload.
-	// TODO(nmcapule): Implement me.
+	var item *tracker.Item
+	if m.DB.Exists(sum) {
+		if item, err = m.DB.Get(sum); err != nil {
+			return nil, err
+		}
+	} else {
+		if err := m.compress(filepaths, sum); err != nil {
+			return nil, err
+		}
 
-	if err := m.compress(filepaths, sum); err != nil {
-		return nil, err
-	}
+		// 3. upload to backups
+		if err := m.uploadToBackups(sum); err != nil {
+			return nil, err
+		}
 
-	// 3. upload to backups
-	// TODO(nmcapule): Implement me.
+		// 4. record to versioning file
+		item = &tracker.Item{
+			ID:      sum,
+			Created: tracker.Time(time.Now()),
+			Author:  m.Config.Workspace.UserIdentifier,
+			Tags:    m.Config.Workspace.TagsGenerator,
+		}
 
-	// 4. record to versioning file
-	item := &tracker.Item{
-		ID:      sum,
-		Created: tracker.Time(time.Now()),
-		Author:  m.Config.Workspace.UserIdentifier,
-		Tags:    m.Config.Workspace.TagsGenerator,
-	}
-
-	m.DB.Put(sum, item)
-	if err := m.DB.Flush(); err != nil {
-		return nil, err
+		m.DB.Put(sum, item)
+		if err := m.DB.Flush(); err != nil {
+			return nil, err
+		}
 	}
 
 	// 5. run post-backup hook
@@ -98,13 +129,26 @@ func (m *Metabox) StartBackup() (*tracker.Item, error) {
 }
 
 func (m *Metabox) StartRestore(item *tracker.Item) error {
+	// Make sure cachepath and targetpath exists.
+	if err := ensurePathExists(m.derivedCachePath()); err != nil {
+		return err
+	}
+	if err := ensurePathExists(m.derivedTargetPath()); err != nil {
+		return err
+	}
+
 	// 1. run pre-restore hook
 	if err := m.exec("pre-restore", m.Config.Workspace.Hooks.PreRestore); err != nil {
 		return err
 	}
 
 	// 2. download from backups if does not exist in cache
-	// TODO(nmcapule): Implement me.
+	cache := filepath.FromSlash(filepath.Join(m.derivedCachePath(), m.compressedFilename(item.ID)))
+	if _, err := os.Stat(cache); os.IsNotExist(err) {
+		if err := m.downloadFromBackups(item.ID); err != nil {
+			return err
+		}
+	}
 
 	// 3. extract and copy to target path
 	if err := m.extract(item.ID); err != nil {

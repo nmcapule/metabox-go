@@ -48,6 +48,11 @@ func NewSimpleFileDB(path string) (*SimpleFileDB, error) {
 	return db, nil
 }
 
+func (db *SimpleFileDB) Exists(key string) bool {
+	_, ok := db.table[key]
+	return ok
+}
+
 func (db *SimpleFileDB) Put(key string, item *Item) error {
 	db.table[key] = item
 	return nil

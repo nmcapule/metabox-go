@@ -53,3 +53,12 @@ func (m *Metabox) hash(filepaths []string) ([]byte, error) {
 
 	return hasher.Sum(nil), nil
 }
+
+func (m *Metabox) compressedFilename(sum string) string {
+	switch m.Config.Workspace.Options.Compress {
+	case "tgz":
+		fallthrough
+	default:
+		return fmt.Sprintf("%s.tar.gz", sum)
+	}
+}

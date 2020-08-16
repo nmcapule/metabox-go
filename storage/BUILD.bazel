@@ -1,0 +1,15 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "errors.go",
+        "local.go",
+        "remote.go",
+        "s3.go",
+        "storage.go",
+    ],
+    importpath = "github.com/nmcapule/metabox-go/storage",
+    visibility = ["//visibility:public"],
+    deps = ["//config:go_default_library"],
+)

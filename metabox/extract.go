@@ -16,7 +16,7 @@ func (m *Metabox) extract(name string) error {
 	}
 
 	// Make sure cachepath exists.
-	cache := filepath.FromSlash(fmt.Sprintf("%s/%s.tar.gz", m.derivedCachePath(), name))
+	cache := filepath.FromSlash(filepath.Join(m.derivedCachePath(), m.compressedFilename(name)))
 	cachefile, err := os.OpenFile(cache, os.O_RDONLY, 0644)
 	if err != nil {
 		return fmt.Errorf("opening cache file: %v", err)

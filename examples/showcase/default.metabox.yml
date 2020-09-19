@@ -32,3 +32,4 @@ backups:
           region: ap-south-1
           bucket: metabox-bucket
           endpoint: ap-south-1.linodeobjects.com
+          prefix_path: hello_world/

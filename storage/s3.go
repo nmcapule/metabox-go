@@ -50,6 +50,7 @@ func (s *S3) Upload(key string, source io.Reader) error {
 	_, err := uploader.Upload(&s3manager.UploadInput{
 		Bucket: aws.String(s.config.Bucket),
 		Key:    aws.String(s.config.PrefixPath + key),
+		Body:   source,
 	})
 	if err != nil {
 		return fmt.Errorf("upload %q: %v", key, err)

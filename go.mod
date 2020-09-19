@@ -3,6 +3,7 @@ module github.com/nmcapule/metabox-go
 go 1.14
 
 require (
+	github.com/aws/aws-sdk-go v1.34.27
 	github.com/bmatcuk/doublestar v1.3.1
 	github.com/creasty/defaults v1.5.0
 	github.com/go-yaml/yaml v2.1.0+incompatible

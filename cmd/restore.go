@@ -10,12 +10,12 @@ import (
 )
 
 type Restore struct {
-	filename string
-	flagTags *[]string
+	configPath string
+	flagTags   *[]string
 }
 
 func (cmd *Restore) Execute() error {
-	box, err := metabox.FromConfigFile(cmd.filename)
+	box, err := metabox.FromConfigFile(cmd.configPath)
 	if err != nil {
 		return fmt.Errorf("metabox from config: %v", err)
 	}
@@ -39,8 +39,8 @@ var cmdRestore = &cobra.Command{
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		r := Restore{
-			filename: args[0],
-			flagTags: cmd.Flags().StringArrayP("tags", "t", nil, "Tag matchers"),
+			configPath: args[0],
+			flagTags:   cmd.Flags().StringArrayP("tags", "t", nil, "Tag matchers"),
 		}
 		if err := r.Execute(); err != nil {
 			log.Fatalln(err)

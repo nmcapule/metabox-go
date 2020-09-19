@@ -25,3 +25,10 @@ backups:
     - driver: local
       local:
           path: /tmp
+    - driver: s3
+      s3:
+          access_key_id: ${ACCESS_KEY_ID}
+          secret_access_key: ${SECRET_ACCESS_KEY}
+          region: ap-south-1
+          bucket: metabox-bucket
+          endpoint: ap-south-1.linodeobjects.com

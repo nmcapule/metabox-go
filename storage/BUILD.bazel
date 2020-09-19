@@ -11,5 +11,12 @@ go_library(
     ],
     importpath = "github.com/nmcapule/metabox-go/storage",
     visibility = ["//visibility:public"],
-    deps = ["//config:go_default_library"],
+    deps = [
+        "//config:go_default_library",
+        "@com_github_aws_aws_sdk_go//aws:go_default_library",
+        "@com_github_aws_aws_sdk_go//aws/credentials:go_default_library",
+        "@com_github_aws_aws_sdk_go//aws/session:go_default_library",
+        "@com_github_aws_aws_sdk_go//service/s3:go_default_library",
+        "@com_github_aws_aws_sdk_go//service/s3/s3manager:go_default_library",
+    ],
 )

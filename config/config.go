@@ -71,6 +71,7 @@ type S3StorageConfig struct {
 	SecretAccessKey string `yaml:"secret_access_key"`
 	Region          string `yaml:"region"`
 	Bucket          string `yaml:"bucket"`
+	Endpoint        string `yaml:"endpoint"`
 }
 
 type Config struct {

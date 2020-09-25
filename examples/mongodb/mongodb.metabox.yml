@@ -1,0 +1,15 @@
+version: 0.1
+workspace:
+    hooks:
+        pre_backup:
+            - echo "hello world"
+            - "./hooks/mongo-backup.sh"
+        post_restore:
+            - "./hooks/mongo-restore.sh"
+target:
+    prefix_path: ./workspace
+    includes:
+        - "**/*"
+    excludes:
+        - ".git/"
+        - "examples/"

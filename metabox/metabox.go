@@ -1,6 +1,7 @@
 package metabox
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"os"
@@ -68,8 +69,11 @@ func FromConfigFile(filename string) (*Metabox, error) {
 
 // StartBackup executes the backup workflow of Metabox.
 func (m *Metabox) StartBackup() (*tracker.Item, error) {
-	// Make sure cachepath exists.
+	// Make sure cachepath and targetpath exists.
 	if err := ensurePathExists(m.derivedCachePath()); err != nil {
+		return nil, err
+	}
+	if err := ensurePathExists(m.derivedTargetPath()); err != nil {
 		return nil, err
 	}
 
@@ -181,12 +185,40 @@ func (m *Metabox) exec(step string, lines []string) error {
 		cmd := exec.Command("sh", "-c", line)
 		cmd.Dir = m.Config.Workspace.RootPath
 
-		out, err := cmd.Output()
+		outpipe, err := cmd.StdoutPipe()
 		if err != nil {
+			return fmt.Errorf("retrieving command pipe: %v", err)
+		}
+		errpipe, err := cmd.StderrPipe()
+		if err != nil {
+			return fmt.Errorf("retrieving command pipe: %v", err)
+		}
+
+		if err := cmd.Start(); err != nil {
+			return fmt.Errorf("failed exec on start: %q: %v", line, err)
+		}
+
+		log.Printf("(%s)$ %s", step, line)
+		{
+			reader := bufio.NewReader(outpipe)
+			out, err := reader.ReadString('\n')
+			for err == nil {
+				log.Printf("%s", out)
+				out, err = reader.ReadString('\n')
+			}
+		}
+		{
+			reader := bufio.NewReader(errpipe)
+			out, err := reader.ReadString('\n')
+			for err == nil {
+				log.Printf("%s", out)
+				out, err = reader.ReadString('\n')
+			}
+		}
+
+		if err := cmd.Wait(); err != nil {
 			return fmt.Errorf("failed exec: %q: %v", line, err)
 		}
-		log.Printf("%s (exec) > %s", step, line)
-		log.Printf("%s (out): %s", step, string(out))
 	}
 	return nil
 }

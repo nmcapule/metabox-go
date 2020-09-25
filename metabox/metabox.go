@@ -175,14 +175,18 @@ func (m *Metabox) derivedTargetPath() string {
 	return filepath.Join(m.Config.Workspace.RootPath, m.Config.Target.PrefixPath)
 }
 
-// exec executes a shell command.
+// exec executes a shell command with working directory set to the path of the input yaml file.
 func (m *Metabox) exec(step string, lines []string) error {
 	for _, line := range lines {
-		_, err := exec.Command("sh", "-c", line).Output()
+		cmd := exec.Command("sh", "-c", line)
+		cmd.Dir = m.Config.Workspace.RootPath
+
+		out, err := cmd.Output()
 		if err != nil {
 			return fmt.Errorf("failed exec: %q: %v", line, err)
 		}
-		log.Printf("%s: %s", step, line)
+		log.Printf("%s (exec) > %s", step, line)
+		log.Printf("%s (out): %s", step, string(out))
 	}
 	return nil
 }

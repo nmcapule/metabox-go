@@ -5,6 +5,7 @@ workspace:
     hooks:
         pre_backup:
             - "echo start"
+            - "df"
         post_backup:
             - "echo end"
     options:

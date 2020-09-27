@@ -126,6 +126,7 @@ None, it's too early and still shitty. Maybe a checklist if things to do first:
 -   [x] Multiple values for backup config option
 -   [ ] Merge / restore strategies: merge, nuke, existing_only, nonexisting_only
 -   [x] Fix cli to use spf13/cobra for sane invocations
+-   [ ] Automated unit tests
 
 # FAQs
 

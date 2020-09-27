@@ -67,21 +67,7 @@ Each column corresponds to:
 -   **Creator**
 -   **Tags**
 
-# Usage
-
-## Backup
-
-```sh
-$ metabox backup ./examples/ouroboros/ouroboros.metabox.yml
-```
-
-## Restore
-
-```sh
-$ metabox restore ./examples/ouroboros/ouroboros.metabox.yml
-```
-
-# `*.metabox.yml` config flags
+## `*.metabox.yml` config flags
 
 | Flag                            | Values    | Description                                                |
 | :------------------------------ | :-------- | :--------------------------------------------------------- |
@@ -114,6 +100,20 @@ $ metabox restore ./examples/ouroboros/ouroboros.metabox.yml
 | backups.\*.local.path           | Object    | Prefix path when storing to local                          |
 
 > You can checkout `config/config.go` for a possibly full list.
+
+# Usage
+
+## Backup
+
+```sh
+$ metabox backup ./examples/ouroboros/ouroboros.metabox.yml
+```
+
+## Restore
+
+```sh
+$ metabox restore ./examples/ouroboros/ouroboros.metabox.yml
+```
 
 # Roadmap
 

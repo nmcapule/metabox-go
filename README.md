@@ -9,6 +9,20 @@ Metabox is a re-implementation of a shell script of the same name archived in
 [nmcapule/metabox](https://github.com/nmcapule/metabox/blob/master/metabox) and
 is also inspired by [huacnlee/gobackup](https://github.com/huacnlee/gobackup).
 
+## Installation
+
+You need `go` toolchain installed.
+
+```sh
+$ go install github.com/nmcapule/metabox-go
+```
+
+If $GOBIN is in your $PATH, you can test it with:
+
+```sh
+$ metabox-go --help
+```
+
 ## How it works
 
 At its core, metabox is just a backup/restore tool. To set it up, you will need a
@@ -103,16 +117,18 @@ Each column corresponds to:
 
 # Usage
 
+Make sure `metabox-go` is reachable in your \$PATH env.
+
 ## Backup
 
 ```sh
-$ metabox backup ./examples/ouroboros/ouroboros.metabox.yml
+$ metabox-go backup ./examples/ouroboros/ouroboros.metabox.yml
 ```
 
 ## Restore
 
 ```sh
-$ metabox restore ./examples/ouroboros/ouroboros.metabox.yml
+$ metabox-go restore ./examples/ouroboros/ouroboros.metabox.yml
 ```
 
 # Roadmap

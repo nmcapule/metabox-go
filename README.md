@@ -121,14 +121,30 @@ Make sure `metabox-go` is reachable in your \$PATH env.
 
 ## Backup
 
+### Basic backup
+
 ```sh
 $ metabox-go backup ./examples/ouroboros/ouroboros.metabox.yml
 ```
 
+### Backup with tags
+
+```sh
+$ metabox-go backup ./examples/ouroboros/ouroboros.metabox.yml -t hello -t branch:development
+```
+
 ## Restore
+
+### Basic restore
 
 ```sh
 $ metabox-go restore ./examples/ouroboros/ouroboros.metabox.yml
+```
+
+### Restore latest backup matching the specified tags
+
+```sh
+$ metabox-go restore ./examples/ouroboros/ouroboros.metabox.yml -t hello -t branch:development
 ```
 
 # Roadmap
@@ -142,6 +158,7 @@ None, it's too early and still shitty. Maybe a checklist if things to do first:
 -   [x] Multiple values for backup config option
 -   [ ] Merge / restore strategies: merge, nuke, existing_only, nonexisting_only
 -   [x] Fix cli to use spf13/cobra for sane invocations
+-   [ ] Allow restore command by specifying hash
 -   [ ] Automated unit tests
 
 # FAQs

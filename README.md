@@ -14,7 +14,7 @@ is also inspired by [huacnlee/gobackup](https://github.com/huacnlee/gobackup).
 You need `go` toolchain installed.
 
 ```sh
-$ go install github.com/nmcapule/metabox-go
+$ go get -u github.com/nmcapule/metabox-go
 ```
 
 If $GOBIN is in your $PATH, you can test it with:

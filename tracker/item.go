@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+const emptyTagsMarker = "-"
+
 // Tags is a []string wrapper with custom csv encode/decode.
 type Tags []string
 
@@ -24,7 +26,7 @@ func (t Tags) Has(tag string) bool {
 func (t Tags) MarshalCSV() ([]byte, error) {
 	// Workaround serialization if no tags are available.
 	if len(t) == 0 {
-		t = append(t, "-")
+		t = append(t, emptyTagsMarker)
 	}
 
 	var buf bytes.Buffer
@@ -38,10 +40,21 @@ func (t Tags) MarshalCSV() ([]byte, error) {
 	return []byte(strings.TrimSpace(buf.String())), w.Error()
 }
 
-func (t *Tags) UnmarshalCSV(data []byte) (err error) {
+func (t *Tags) UnmarshalCSV(data []byte) error {
 	r := csv.NewReader(bytes.NewBuffer(data))
-	*t, err = r.Read()
-	return
+	tags, err := r.Read()
+	if err != nil {
+		return err
+	}
+
+	// If found an empty tags in the first element, ignore it.
+	if tags[0] == emptyTagsMarker {
+		tags = tags[1:]
+	}
+
+	*t = tags
+
+	return nil
 }
 
 // Time is a time.Time wrapper with custom CSV encode/decode.

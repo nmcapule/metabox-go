@@ -1,4 +1,9 @@
-# Overview
+# Project Metabox
+
+Ever wanted to create a backup of your databases[^1] per branch and track each
+record in an easily searchable text file?
+
+## Overview
 
 Metabox is a backup and restore tool that can:
 
@@ -8,6 +13,8 @@ Metabox is a backup and restore tool that can:
 Metabox is a re-implementation of a shell script of the same name archived in
 [nmcapule/metabox](https://github.com/nmcapule/metabox/blob/master/metabox) and
 is also inspired by [huacnlee/gobackup](https://github.com/huacnlee/gobackup).
+
+[^1]: Or I dunno, whatever floats your boat.
 
 ## Installation
 

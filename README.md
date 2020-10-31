@@ -3,6 +3,8 @@
 Ever wanted to create a backup of your databases[^1] per branch and track each
 record in an easily searchable text file?
 
+[![asciicast](https://asciinema.org/a/369296.png)](https://asciinema.org/a/369296)
+
 [^1]: Or I dunno, whatever floats your boat.
 
 ## Overview

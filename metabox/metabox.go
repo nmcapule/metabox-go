@@ -100,6 +100,14 @@ func (m *Metabox) StartBackup() (*tracker.Item, error) {
 		if item, err = m.DB.Get(sum); err != nil {
 			return nil, err
 		}
+
+		// Check if there are new tags to be added.
+		for _, tag := range m.Config.Workspace.TagsGenerator {
+			if item.Tags.Has(tag) {
+				continue
+			}
+			item.Tags = append(item.Tags, tag)
+		}
 	} else {
 		if err := m.compress(filepaths, sum); err != nil {
 			return nil, err
@@ -117,11 +125,12 @@ func (m *Metabox) StartBackup() (*tracker.Item, error) {
 			Author:  m.Config.Workspace.UserIdentifier,
 			Tags:    m.Config.Workspace.TagsGenerator,
 		}
+	}
 
-		m.DB.Put(sum, item)
-		if err := m.DB.Flush(); err != nil {
-			return nil, err
-		}
+	// write to db to be sure
+	m.DB.Put(sum, item)
+	if err := m.DB.Flush(); err != nil {
+		return nil, err
 	}
 
 	// 5. run post-backup hook
@@ -132,6 +141,7 @@ func (m *Metabox) StartBackup() (*tracker.Item, error) {
 	return item, nil
 }
 
+// StartRestore restores the saved record.
 func (m *Metabox) StartRestore(item *tracker.Item) error {
 	// Make sure cachepath and targetpath exists.
 	if err := ensurePathExists(m.derivedCachePath()); err != nil {

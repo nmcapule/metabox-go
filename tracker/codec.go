@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sort"
+	"time"
 
 	"github.com/jszwec/csvutil"
 )
@@ -53,6 +55,13 @@ func encodeItemsToFile(path string, items []*Item) error {
 	if err != nil {
 		return fmt.Errorf("opening %s: %v", path, err)
 	}
+
+	// Sort the items first by ascending timestamp.
+	sort.SliceStable(items, func(i, j int) bool {
+		a := time.Time(items[i].Created)
+		b := time.Time(items[j].Created)
+		return a.Before(b)
+	})
 
 	writer := csv.NewWriter(file)
 	writer.Comma = separator

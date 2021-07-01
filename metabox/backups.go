@@ -30,7 +30,7 @@ func (m *Metabox) uploadToBackups(sum string) error {
 func (m *Metabox) downloadFromBackups(sum string) error {
 	filename := m.compressedFilename(sum)
 	filepath := filepath.Join(m.derivedCachePath(), filename)
-	file, err := os.OpenFile(filepath, os.O_CREATE|os.O_WRONLY, os.FileMode(0644))
+	file, err := os.Create(filepath)
 	if err != nil {
 		return fmt.Errorf("open %q: %v", filepath, err)
 	}

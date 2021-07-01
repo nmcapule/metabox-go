@@ -45,7 +45,7 @@ func (s *Local) Upload(key string, source io.Reader) error {
 	return nil
 }
 
-func (s *Local) Download(key string, destination io.Writer) error {
+func (s *Local) Download(key string, destination WriterWriterAt) error {
 	path := filepath.Join(s.config.Path, key)
 	file, err := os.Open(path)
 	if err != nil {

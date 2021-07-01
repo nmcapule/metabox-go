@@ -22,6 +22,6 @@ func (s *Remote) Upload(key string, source io.Reader) error {
 	return errUnimplemented
 }
 
-func (s *Remote) Download(key string, destination io.Writer) error {
+func (s *Remote) Download(key string, destination WriterWriterAt) error {
 	return errUnimplemented
 }

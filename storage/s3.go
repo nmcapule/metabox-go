@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 
@@ -58,18 +57,14 @@ func (s *S3) Upload(key string, source io.Reader) error {
 	return nil
 }
 
-func (s *S3) Download(key string, destination io.Writer) error {
+func (s *S3) Download(key string, destination WriterWriterAt) error {
 	downloader := s3manager.NewDownloader(s.session)
-	buf := aws.NewWriteAtBuffer([]byte{})
-	_, err := downloader.Download(buf, &s3.GetObjectInput{
+	_, err := downloader.Download(destination, &s3.GetObjectInput{
 		Bucket: aws.String(s.config.Bucket),
 		Key:    aws.String(s.config.PrefixPath + key),
 	})
 	if err != nil {
 		return fmt.Errorf("download %q: %v", key, err)
-	}
-	if _, err := io.Copy(destination, bytes.NewBuffer(buf.Bytes())); err != nil {
-		return fmt.Errorf("copy to destination: %v", err)
 	}
 	return nil
 }
